@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智造 Skill · 制造业 AI Skill 演示平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --steel:#0E4DA4;
+    --steel-dark:#061F3F;
+    --amber:#E07A2F;
+    --bg:#F6F7F9;
+    --ink:#0E1A2B;
+    --ink-2:#5C6675;
+    --ink-3:#9FB2C9;
+    --line:#E5E8ED;
+    --card:#FFFFFF;
+    --amber-soft:#FCEBDD;
+    --blue-soft:#EAF1FB;
+    --shadow:0 8px 24px rgba(14,77,164,.06);
+    --shadow-lg:0 24px 48px rgba(6,31,63,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{text-decoration:none;color:inherit;}
+  .wrap{max-width:1440px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:#fff;border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    height:72px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 48px;max-width:1440px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;color:var(--ink);cursor:pointer;}
+  .brand svg{display:block;}
+  nav.links{display:flex;gap:32px;align-items:center;}
+  nav.links a{font-size:15px;color:var(--ink-2);cursor:pointer;}
+  nav.links a.active{color:var(--ink);font-weight:500;}
+  .cta{
+    background:var(--amber);color:#fff;font-weight:600;font-size:15px;
+    padding:12px 24px;border-radius:999px;border:none;cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .cta:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(224,122,47,.35);}
+
+  /* ---------- Views ---------- */
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:linear-gradient(135deg,#0E4DA4 0%,#061F3F 100%);
+    color:#fff;display:flex;gap:48px;align-items:center;justify-content:space-between;
+    padding:80px 120px;min-height:560px;
+  }
+  .hero-content{width:620px;max-width:55%;display:flex;flex-direction:column;gap:22px;align-items:flex-start;}
+  .badge{background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:13px;padding:8px 16px;border-radius:999px;}
+  .hero h1{font-size:46px;font-weight:800;line-height:1.26;}
+  .hero p.sub{font-size:17px;line-height:1.65;color:#DCE6F2;}
+  .hero-cta{display:flex;gap:16px;align-items:center;}
+  .btn-primary{background:var(--amber);color:#fff;font-weight:600;font-size:16px;padding:14px 28px;border-radius:999px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(224,122,47,.4);}
+  .btn-primary.sm{padding:10px 20px;font-size:14px;}
+  .btn-ghost{background:transparent;color:#fff;font-weight:500;font-size:16px;padding:14px 28px;border-radius:999px;border:1px solid rgba(255,255,255,.55);cursor:pointer;transition:background .15s;}
+  .btn-ghost:hover{background:rgba(255,255,255,.1);}
+  .trust{font-size:13px;color:var(--ink-3);}
+
+  .hero-visual{display:flex;align-items:center;justify-content:center;flex:1;}
+  .preview{
+    width:440px;background:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px;
+    box-shadow:0 24px 48px rgba(6,31,63,.35);
+  }
+  .preview-bar{display:flex;gap:8px;align-items:center;}
+  .dot{width:10px;height:10px;border-radius:999px;}
+  .preview-bar span.title{font-size:13px;color:var(--ink-2);margin-left:6px;}
+  .position-tabs{display:flex;gap:8px;align-items:center;justify-content:space-between;}
+  .mini-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;border-radius:8px;background:#F6F7F9;transition:background .15s;cursor:pointer;}
+  .mini-tab svg{display:block;color:var(--ink-2);}
+  .mini-tab span{font-size:11px;font-weight:500;color:var(--ink-2);}
+  .mini-tab:hover{background:#eef1f5;}
+  .mini-tab.active{background:var(--steel);}
+  .mini-tab.active svg{color:#fff;}
+  .mini-tab.active span{color:#fff;font-weight:600;}
+  .showcase{
+    height:200px;border-radius:14px;
+    background:linear-gradient(135deg,#0E4DA4,#E07A2F);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    text-align:center;padding:0 20px;
+  }
+  .showcase h4{font-size:16px;font-weight:700;color:#fff;}
+  .showcase span{font-size:13px;color:#DCE6F2;}
+  .preview-stat{display:flex;gap:10px;align-items:center;}
+  .preview-stat .tag{background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:12px;padding:6px 12px;border-radius:999px;}
+  .preview-stat .meta{font-size:13px;color:var(--ink-2);}
+  .play{width:54px;height:54px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;opacity:.95;}
+
+  /* ---------- Position section (home) ---------- */
+  .section{padding:72px 120px;}
+  .section h2{font-size:32px;font-weight:800;}
+  .section .lead{font-size:16px;color:var(--ink-2);margin-top:12px;}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;margin-top:40px;}
+  .pos-card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;
+    display:flex;flex-direction:column;gap:14px;align-items:flex-start;cursor:pointer;
+    box-shadow:var(--shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s;
+  }
+  .pos-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(14,77,164,.12);border-color:#cdd8e8;}
+  .icon-box{width:44px;height:44px;border-radius:12px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;}
+  .pos-card h3{font-size:19px;font-weight:700;}
+  .pos-card p{font-size:13px;color:var(--ink-2);line-height:1.55;}
+  .pos-card .arrow{font-size:14px;font-weight:600;color:var(--amber);margin-top:auto;}
+  .count-badge{align-self:flex-start;background:var(--blue-soft);color:var(--steel);font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;}
+
+  /* ---------- Breadcrumb ---------- */
+  .crumb{padding:24px 120px;display:flex;gap:8px;align-items:center;font-size:14px;}
+  .crumb a{color:var(--ink-2);cursor:pointer;}
+  .crumb a:hover{color:var(--ink);}
+  .crumb .sep{color:var(--ink-3);}
+  .crumb .current{color:var(--steel);font-weight:600;}
+
+  /* ---------- Position detail ---------- */
+  .pos-intro{padding:56px 120px 40px;}
+  .pos-intro .badge{margin-bottom:16px;}
+  .pos-intro h1{font-size:40px;font-weight:800;line-height:1.3;}
+  .pos-intro p{font-size:17px;color:var(--ink-2);line-height:1.65;margin-top:16px;max-width:880px;}
+  .skills-head{padding:40px 120px 0;}
+  .skills-head h2{font-size:28px;font-weight:800;}
+  .skills-head p{font-size:14px;color:var(--ink-2);margin-top:8px;}
+  .skills-list{padding:24px 120px 80px;display:flex;flex-direction:column;gap:20px;}
+  .skill-card{
+    background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;
+    display:flex;gap:28px;align-items:center;cursor:pointer;box-shadow:var(--shadow);
+    transition:transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .skill-card:hover{transform:translateY(-3px);box-shadow:0 18px 36px rgba(14,77,164,.12);border-color:#cdd8e8;}
+  .skill-thumb{
+    width:280px;height:160px;border-radius:14px;flex-shrink:0;
+    background:linear-gradient(135deg,#0E4DA4,#E07A2F);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .skill-body{flex:1;display:flex;flex-direction:column;gap:14px;align-items:flex-start;}
+  .skill-body h3{font-size:22px;font-weight:700;}
+  .skill-body p{font-size:15px;color:var(--ink-2);line-height:1.6;}
+  .skill-body .meta{font-size:13px;color:var(--ink-3);}
+  .skill-body .arrow{font-size:15px;font-weight:600;color:var(--amber);}
+  .empty-state{padding:40px;background:#fff;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--ink-2);}
+  .empty-state a{color:var(--steel);font-weight:600;cursor:pointer;text-decoration:underline;}
+
+  /* ---------- Skill detail ---------- */
+  .skill-title-sec{padding:40px 120px 24px;}
+  .skill-title-sec h1{font-size:36px;font-weight:800;}
+  .skill-meta{display:flex;gap:12px;align-items:center;margin-top:16px;}
+  .skill-meta .tag{background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px;}
+  .skill-meta span{font-size:14px;color:var(--ink-2);}
+  .skill-content{padding:24px 120px 80px;display:flex;flex-direction:column;gap:28px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow);}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .card-head h3{font-size:20px;font-weight:700;}
+  .edit-btn{background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:13px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;transition:background .15s;}
+  .edit-btn:hover{background:#f8dcc4;}
+  .text-hint{font-size:13px;color:var(--ink-3);margin-bottom:14px;}
+  .text-body{font-size:15px;line-height:1.73;color:var(--ink);white-space:pre-wrap;}
+
+  .video-body{
+    width:100%;height:480px;border-radius:14px;overflow:hidden;
+    background:linear-gradient(135deg,#0E4DA4,#E07A2F);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .video-body video{width:100%;height:100%;object-fit:cover;display:block;}
+  .video-caption{font-size:14px;color:var(--ink-2);margin-top:14px;}
+
+  .download-body{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .file-group{display:flex;align-items:center;gap:16px;}
+  .file-icon{width:48px;height:48px;border-radius:10px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .file-info{display:flex;flex-direction:column;gap:4px;}
+  .file-info .name{font-size:15px;font-weight:500;}
+  .file-info .size{font-size:13px;color:var(--ink-2);}
+  .dl-btn{background:var(--amber);color:#fff;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  .dl-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(224,122,47,.35);}
+  .dl-btn:disabled{background:#ccc;cursor:not-allowed;}
+
+  /* ---------- Admin ---------- */
+  .admin-layout{display:flex;min-height:calc(100vh - 72px);}
+  .admin-sidebar{width:300px;background:#fff;border-right:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:16px;overflow:auto;}
+  .admin-sidebar h2{font-size:18px;font-weight:700;}
+  .admin-pos-list{display:flex;flex-direction:column;gap:8px;}
+  .admin-pos-item{padding:12px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s;}
+  .admin-pos-item:hover{background:var(--bg);}
+  .admin-pos-item.active{background:var(--steel);color:#fff;}
+  .admin-pos-item .count{font-size:12px;background:var(--blue-soft);color:var(--steel);padding:2px 8px;border-radius:999px;}
+  .admin-pos-item.active .count{background:#fff;color:var(--steel);}
+  .admin-main{flex:1;padding:32px;overflow:auto;}
+  .admin-banner{background:#fff8f0;border:1px solid #f5d0b0;border-radius:10px;padding:14px 16px;color:#8a4b1b;font-size:13px;line-height:1.6;margin-bottom:20px;}
+  .admin-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .admin-section-header h2{font-size:24px;font-weight:800;}
+  .admin-skill-list{display:flex;flex-direction:column;gap:12px;}
+  .admin-skill-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+  .admin-skill-info{display:flex;flex-direction:column;gap:4px;}
+  .admin-skill-info h4{font-size:15px;font-weight:700;}
+  .admin-skill-info span{font-size:12px;color:var(--ink-2);}
+  .admin-skill-badges{display:flex;gap:6px;}
+  .admin-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--blue-soft);color:var(--steel);}
+  .admin-actions{display:flex;gap:8px;}
+  .admin-empty{color:var(--ink-2);padding:24px;background:#fff;border-radius:12px;border:1px dashed var(--line);}
+  .admin-form{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:16px;margin-top:16px;}
+  .admin-form h3{font-size:18px;font-weight:700;margin-bottom:4px;}
+  .form-row{display:flex;flex-direction:column;gap:6px;}
+  .form-row label{font-size:13px;font-weight:600;color:var(--ink-2);}
+  .form-row input,.form-row textarea{padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;}
+  .form-row input:focus,.form-row textarea:focus{border-color:var(--steel);}
+  .form-row textarea{min-height:120px;resize:vertical;}
+  .form-hint{font-size:12px;color:var(--ink-3);}
+  .form-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:8px;}
+  .btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--line);padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;transition:background .15s;}
+  .btn-secondary:hover{background:var(--bg);}
+  .btn-danger{background:#fff0f0;color:#c53030;border:1px solid #f5c2c2;padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;transition:background .15s;}
+  .btn-danger:hover{background:#ffe5e5;}
+  .admin-toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--steel-dark);color:#fff;padding:56px 120px;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+  .foot-left{display:flex;flex-direction:column;gap:14px;}
+  .foot-left .b{font-size:20px;font-weight:700;}
+  .foot-left .t{font-size:14px;color:var(--ink-3);}
+  .foot-left .c{font-size:12px;color:var(--ink-2);}
+  .foot-cols{display:flex;gap:64px;}
+  .foot-col{display:flex;flex-direction:column;gap:12px;}
+  .foot-col h4{font-size:14px;font-weight:600;}
+  .foot-col a{font-size:13px;color:var(--ink-3);cursor:pointer;}
+  .foot-col a:hover{color:#fff;}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:1100px){
+    .hero,.section,.pos-intro,.skills-head,.skills-list,.skill-title-sec,.skill-content,.crumb,footer{padding-left:32px;padding-right:32px;}
+    .hero{flex-direction:column;align-items:flex-start;}
+    .hero-content{width:100%;max-width:100%;}
+    .hero-visual{width:100%;}
+    .preview{width:100%;max-width:440px;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .skill-card{flex-direction:column;align-items:stretch;}
+    .skill-thumb{width:100%;}
+    .admin-sidebar{width:240px;}
+  }
+  @media(max-width:640px){
+    .nav-inner{padding:0 20px;}
+    nav.links{display:none;}
+    .grid{grid-template-columns:1fr;}
+    .foot-cols{gap:32px;flex-wrap:wrap;}
+    .admin-layout{flex-direction:column;}
+    .admin-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <div class="brand" onclick="navigate('/')">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.49.49 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="#0E4DA4"/></svg>
+      智造 Skill
+    </div>
+    <nav class="links">
+      <a data-nav="home" class="active">首页</a>
+      <a data-nav="positions">岗位技能</a>
+      <a data-nav="about">关于我们</a>
+    </nav>
+    <button class="cta" onclick="alert('演示提示：正式环境可在此接入预约表单。')">预约演示</button>
+  </div>
+</header>
+
+<!-- ============ VIEW: HOME ============ -->
+<section class="view active" id="view-home">
+  <div class="hero">
+    <div class="hero-content">
+      <span class="badge">制造业 AI Skill 演示平台</span>
+      <h1>把每个岗位的 know-how，封装成可演示的 Skill</h1>
+      <p class="sub">面向人事、销售、研发、制造、仓库五大核心岗位，将岗位经验沉淀为标准 Skill。文字介绍、视频讲解、技能压缩包，全部由你上传，随时向客户演示。</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="showPositions()">浏览岗位 Skill</button>
+        <button class="btn-ghost" onclick="alert('演示提示：此处可嵌入平台介绍视频。')">观看平台介绍</button>
+      </div>
+      <span class="trust">覆盖五大核心岗位</span>
+    </div>
+    <div class="hero-visual">
+      <div class="preview">
+        <div class="preview-bar">
+          <span class="dot" style="background:#FF5F57"></span>
+          <span class="dot" style="background:#FEBC2E"></span>
+          <span class="dot" style="background:#28C840"></span>
+          <span class="title">平台能力总览</span>
+        </div>
+        <div class="position-tabs" id="hero-tabs"></div>
+        <div class="showcase" id="hero-showcase"></div>
+        <div class="preview-stat">
+          <span class="tag">覆盖全链路</span>
+          <span class="meta">支持文字 / 视频 / 压缩包演示</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>五大岗位 Skill，开箱即用</h2>
+    <p class="lead">点击任意岗位，进入查看对应 Skill 的文字、视频与压缩包演示素材。</p>
+    <div class="grid" id="home-pos-grid"></div>
+  </div>
+
+  <footer>
+    <div class="foot-left">
+      <span class="b">智造 Skill</span>
+      <span class="t">把岗位经验，做成可演示的 Skill。</span>
+      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
+      <div class="foot-col"><h4>公司</h4><a onclick="alert('演示占位')">关于我们</a><a onclick="alert('演示占位')">联系商务</a></div>
+      <div class="foot-col"><h4>资源</h4><a onclick="goAdmin()">管理后台</a><a onclick="alert('演示占位')">更新日志</a></div>
+    </div>
+  </footer>
+</section>
+
+<!-- ============ VIEW: POSITIONS OVERVIEW ============ -->
+<section class="view" id="view-positions">
+  <div class="crumb"><a onclick="navigate('/')">首页</a><span class="sep">/</span><span class="current">岗位技能</span></div>
+  <div class="pos-intro">
+    <span class="badge">岗位 Skill 目录</span>
+    <h1>选择岗位，查看全部 Skill</h1>
+    <p>每个岗位下的 Skill 都支持文字介绍、讲解视频和可下载压缩包；内容可在「管理后台」自行添加、编辑与替换。</p>
+  </div>
+  <div class="section" style="padding-top:24px;">
+    <div class="grid" id="positions-grid"></div>
+  </div>
+  <footer>
+    <div class="foot-left">
+      <span class="b">智造 Skill</span>
+      <span class="t">把岗位经验，做成可演示的 Skill。</span>
+      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
+      <div class="foot-col"><h4>公司</h4><a onclick="alert('演示占位')">关于我们</a><a onclick="alert('演示占位')">联系商务</a></div>
+      <div class="foot-col"><h4>资源</h4><a onclick="goAdmin()">管理后台</a><a onclick="alert('演示占位')">更新日志</a></div>
+    </div>
+  </footer>
+</section>
+
+<!-- ============ VIEW: POSITION ============ -->
+<section class="view" id="view-position">
+  <div class="crumb" id="pos-crumb"></div>
+  <div class="pos-intro">
+    <span class="badge" id="pos-badge">销售岗</span>
+    <h1 id="pos-title">销售岗位 Skill 库</h1>
+    <p id="pos-desc"></p>
+  </div>
+  <div class="skills-head">
+    <h2>岗位 Skill</h2>
+    <p id="pos-skills-sub"></p>
+  </div>
+  <div class="skills-list" id="pos-skills"></div>
+  <footer>
+    <div class="foot-left">
+      <span class="b">智造 Skill</span>
+      <span class="t">把岗位经验，做成可演示的 Skill。</span>
+      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
+      <div class="foot-col"><h4>公司</h4><a onclick="alert('演示占位')">关于我们</a><a onclick="alert('演示占位')">联系商务</a></div>
+      <div class="foot-col"><h4>资源</h4><a onclick="goAdmin()">管理后台</a><a onclick="alert('演示占位')">更新日志</a></div>
+    </div>
+  </footer>
+</section>
+
+<!-- ============ VIEW: SKILL ============ -->
+<section class="view" id="view-skill">
+  <div class="crumb" id="skill-crumb"></div>
+  <div class="skill-title-sec">
+    <h1 id="skill-title">客户跟进话术 Skill</h1>
+    <div class="skill-meta">
+      <span class="tag" id="skill-pos-tag">销售岗</span>
+      <span id="skill-meta-text">v1.2 · 更新于 2026-06-15</span>
+    </div>
+  </div>
+  <div class="skill-content">
+    <div class="card">
+      <div class="card-head"><h3>文字介绍</h3><button class="edit-btn" onclick="goAdmin()">去管理后台编辑</button></div>
+      <div class="text-body" id="skill-text"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>视频介绍</h3></div>
+      <div class="video-body" id="video-body"><div class="play"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#0E4DA4"/></svg></div></div>
+      <div class="video-caption" id="video-caption">讲解视频</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Skill 压缩包</h3></div>
+      <div class="download-body">
+        <div class="file-group">
+          <div class="file-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="file-info">
+            <span class="name" id="file-name">sales-follow-up-skill-v1.2.zip</span>
+            <span class="size" id="file-size">12.4 MB · 含话术模板 + 视频源文件</span>
+          </div>
+        </div>
+        <button class="dl-btn" id="dl-btn" onclick="downloadSkill()">下载压缩包</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="foot-left">
+      <span class="b">智造 Skill</span>
+      <span class="t">把岗位经验，做成可演示的 Skill。</span>
+      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
+      <div class="foot-col"><h4>公司</h4><a onclick="alert('演示占位')">关于我们</a><a onclick="alert('演示占位')">联系商务</a></div>
+      <div class="foot-col"><h4>资源</h4><a onclick="goAdmin()">管理后台</a><a onclick="alert('演示占位')">更新日志</a></div>
+    </div>
+  </footer>
+</section>
+
+<!-- ============ VIEW: ADMIN ============ -->
+<section class="view" id="view-admin">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <h2>岗位管理</h2>
+      <div class="admin-pos-list" id="admin-pos-list"></div>
+      <button class="btn-primary sm" onclick="showPositionForm()">+ 添加岗位</button>
+      <div id="admin-pos-form" class="admin-form" style="display:none;">
+        <h3 id="pos-form-title">添加岗位</h3>
+        <input type="hidden" id="adm-pos-id">
+        <div class="form-row"><label>岗位名称</label><input id="adm-pos-name" placeholder="如：销售岗"></div>
+        <div class="form-row"><label>卡片简介</label><input id="adm-pos-short" placeholder="一句话介绍"></div>
+        <div class="form-row"><label>岗位说明</label><textarea id="adm-pos-intro" placeholder="岗位 Skill 库说明"></textarea></div>
+        <div class="form-actions">
+          <button class="btn-secondary" onclick="hidePositionForm()">取消</button>
+          <button class="btn-primary" onclick="savePositionForm()">保存</button>
+        </div>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <div class="admin-banner">
+        <strong>纯前端演示说明：</strong>在此后台添加的岗位、Skill、视频与压缩包会保存在当前浏览器的本地存储中。刷新页面不会丢失，但换设备/浏览器或清空缓存会丢失；正式上线需接入后端存储。
+      </div>
+      <div class="admin-toolbar">
+        <button class="btn-secondary" onclick="exportData()">导出配置 JSON</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">导入配置 JSON</button>
+        <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importData(this)">
+        <button class="btn-danger" onclick="resetDefaults()">重置为示例数据</button>
+      </div>
+      <div id="admin-welcome" class="admin-empty">选择左侧岗位以管理 Skill。</div>
+      <div id="admin-skill-panel" style="display:none;">
+        <div class="admin-section-header">
+          <h2 id="admin-pos-title"></h2>
+          <button class="btn-primary sm" onclick="showSkillForm()">+ 添加 Skill</button>
+        </div>
+        <div id="admin-skill-list" class="admin-skill-list"></div>
+        <div id="admin-skill-form" class="admin-form" style="display:none;">
+          <h3 id="skill-form-title">添加 Skill</h3>
+          <input type="hidden" id="adm-skill-id">
+          <div class="form-row"><label>Skill 名称</label><input id="adm-skill-title" placeholder="如：客户跟进话术 Skill"></div>
+          <div class="form-row"><label>一句话描述</label><input id="adm-skill-desc" placeholder="简要说明覆盖场景"></div>
+          <div class="form-row"><label>元信息</label><input id="adm-skill-meta" placeholder="更新于 2026-06-15 · v1.2 · 视频 02:14"></div>
+          <div class="form-row"><label>文字介绍</label><textarea id="adm-skill-text" placeholder="Skill 的详细介绍文字"></textarea></div>
+          <div class="form-row"><label>压缩包文件名</label><input id="adm-skill-zipname" placeholder="如：sales-skill-v1.2.zip"></div>
+          <div class="form-row"><label>压缩包大小说明</label><input id="adm-skill-zipsize" placeholder="如：12.4 MB · 含话术模板"></div>
+          <div class="form-row"><label>讲解视频</label><input type="file" id="adm-skill-video" accept="video/*"><span class="form-hint">替换视频时选择文件；留空保留原视频</span></div>
+          <div class="form-row"><label>Skill 压缩包</label><input type="file" id="adm-skill-zip" accept=".zip,application/zip"><span class="form-hint">替换压缩包时选择文件；留空保留原文件</span></div>
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="hideSkillForm()">取消</button>
+            <button class="btn-primary" onclick="saveSkillForm()">保存</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<script>
+/* ---------- 图标 ---------- */
+const ICONS = {
+  hr:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="4" stroke="#0E4DA4" stroke-width="2"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="#0E4DA4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#0E4DA4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#0E4DA4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  sales:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M23 6l-9.5 9.5-5-5L1 18" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6h6v6" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  rd:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="14" height="14" rx="2" stroke="#0E4DA4" stroke-width="2" fill="none"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="#0E4DA4" stroke-width="2" stroke-linecap="round"/></svg>',
+  mfg:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 20h20" stroke="#0E4DA4" stroke-width="2"/><path d="M4 20V9l5 4V9l5 4V6l5 4v10" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  wh:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05" stroke="#0E4DA4" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22.08V12" stroke="#0E4DA4" stroke-width="2" fill="none"/></svg>'
+};
+const MINI_ICONS = {
+  hr:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  sales:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M23 6l-9.5 9.5-5-5L1 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6h6v6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  rd:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  mfg:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2 20h20" stroke="currentColor" stroke-width="2"/><path d="M4 20V9l5 4V9l5 4V6l5 4v10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  wh:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22.08V12" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+};
+
+/* ---------- 数据模型 ---------- */
+const POS_KEYS = ['hr','sales','rd','mfg','wh'];
+let positions = {};
+let currentVideoUrl = null;
+let adminSelectedPos = null;
+
+function seedDefaults(){
+  return {
+    hr:{
+      name:'人事岗', short:'招聘、入离职、薪酬绩效等标准化 Skill。',
+      intro:'覆盖招聘筛选、入职引导、薪酬核算、绩效评定等人事全流程。每个 Skill 都支持上传文字说明、讲解视频和技能压缩包，方便向客户直观演示。',
+      skills:[
+        {id:'hr-screen', title:'简历初筛与面试安排 Skill', desc:'覆盖 JD 解析、简历打分、初筛话术到面试日程自动编排。包含视频讲解与可下载的面试评估模板压缩包。', meta:'更新于 2026-06-10 · v1.1 · 视频 03:02', text:'简历初筛与面试安排 Skill 面向 HR 与招聘负责人，覆盖从 JD 解析、简历结构化打分、初筛沟通话术到面试日程自动编排的完整流程。\n\n本 Skill 已沉淀 8 类岗位评分维度、24 组初筛话术，并配套面试评估表与自动化排期模板，帮助招聘团队把单岗平均筛选周期缩短 40%。', zipFileName:'hr-resume-screening-skill-v1.1.zip', zipSizeText:'9.8 MB · 含评估表 + 排期模板', hasVideo:false, hasZip:false},
+        {id:'hr-payroll', title:'薪酬绩效面谈 Skill', desc:'覆盖薪酬结构说明、绩效反馈话术、异议处理到改进计划制定。包含视频讲解与面谈记录模板压缩包。', meta:'更新于 2026-06-12 · v1.0 · 视频 02:35', text:'薪酬绩效面谈 Skill 面向 HRBP 与主管，覆盖从薪酬结构说明、绩效反馈话术、异议处理到改进计划制定的完整面谈流程。\n\n本 Skill 已沉淀 6 类常见异议场景、18 组标准回应，并配套面谈记录模板，帮助管理者在敏感对话中保持专业与温度。', zipFileName:'hr-payroll-talk-skill-v1.0.zip', zipSizeText:'7.2 MB · 含面谈模板 + 案例录音', hasVideo:false, hasZip:false}
+      ]
+    },
+    sales:{
+      name:'销售岗', short:'客户跟进、报价测算、回款管理等实战 Skill。',
+      intro:'覆盖客户开发、报价测算、合同签订、回款跟进等销售全流程。每个 Skill 都支持上传文字说明、讲解视频和技能压缩包，方便向客户直观演示。',
+      skills:[
+        {id:'sales-follow', title:'客户跟进话术 Skill', desc:'覆盖首次触达、需求挖掘、异议处理到逼单成交的完整销售话术。包含视频讲解和可下载的话术模板压缩包。', meta:'更新于 2026-06-15 · v1.2 · 视频 02:14', text:'客户跟进话术 Skill 面向一线销售，覆盖从首次触达、需求挖掘、异议处理到逼单成交的完整对话场景。每次跟进前，销售可通过该 Skill 快速调取对应阶段的标准话术与应对模板，确保沟通专业、节奏一致。\n\n本 Skill 已沉淀 12 个高频场景、36 组标准话术，并配套真实录音拆解，帮助新销售在 2 周内建立完整的客户沟通体系。', zipFileName:'sales-follow-up-skill-v1.2.zip', zipSizeText:'12.4 MB · 含话术模板 + 视频源文件', hasVideo:false, hasZip:false},
+        {id:'sales-quote', title:'报价测算 Skill', desc:'覆盖成本拆分、报价策略、折扣审批到报价单生成的完整报价流程。包含视频讲解与报价模板压缩包。', meta:'更新于 2026-06-18 · v1.0 · 视频 03:50', text:'报价测算 Skill 面向销售与售前，覆盖从成本拆分、报价策略、折扣审批到报价单生成的完整流程。帮助销售在保障利润的同时快速响应客户需求。\n\n本 Skill 已沉淀 4 类报价模型、10 组折扣审批话术，并配套报价单模板与测算示例，帮助新人 1 周内独立输出标准报价。', zipFileName:'sales-quote-skill-v1.0.zip', zipSizeText:'8.6 MB · 含报价模板 + 测算示例', hasVideo:false, hasZip:false}
+      ]
+    },
+    rd:{
+      name:'研发岗', short:'需求拆解、代码评审、缺陷定位等工程 Skill。',
+      intro:'覆盖需求澄清、用户故事拆分、技术可行性评估到任务拆解等研发全流程。每个 Skill 都支持上传文字说明、讲解视频和技能压缩包，方便向客户直观演示。',
+      skills:[
+        {id:'rd-req', title:'需求拆解 Skill', desc:'覆盖需求澄清、用户故事拆分、技术可行性评估到任务拆解。包含视频讲解与可下载的拆解模板压缩包。', meta:'更新于 2026-06-18 · v1.0 · 视频 04:21', text:'需求拆解 Skill 面向产品与研发协作场景，覆盖从需求澄清、用户故事拆分、技术可行性评估到开发任务拆解的全过程。帮助团队在立项前对齐理解，降低返工率。\n\n本 Skill 已沉淀 5 类拆解框架、18 组验收标准模板，并配套真实项目拆解录像，帮助新人在 1 周内上手标准化需求管理。', zipFileName:'rd-requirement-breakdown-skill-v1.0.zip', zipSizeText:'15.2 MB · 含拆解框架 + 示例工程', hasVideo:false, hasZip:false},
+        {id:'rd-review', title:'代码评审 Skill', desc:'覆盖评审清单、常见问题标注、反馈话术到评审结论输出。包含视频讲解与评审规范压缩包。', meta:'更新于 2026-06-20 · v1.1 · 视频 03:15', text:'代码评审 Skill 面向研发工程师，覆盖从评审清单、常见问题标注、反馈话术到评审结论输出的完整流程。帮助团队建立统一的代码质量基线。\n\n本 Skill 已沉淀 7 类常见缺陷模式、20 组反馈话术，并配套评审 Checklist 与示例 PR，帮助新成员在 2 周内达到团队评审标准。', zipFileName:'rd-code-review-skill-v1.1.zip', zipSizeText:'11.3 MB · 含评审清单 + 示例 PR', hasVideo:false, hasZip:false}
+      ]
+    },
+    mfg:{
+      name:'制造岗', short:'工艺排产、设备点检、质量巡检等产线 Skill。',
+      intro:'覆盖工艺路线梳理、产能测算、排产优化到异常调度等制造全流程。每个 Skill 都支持上传文字说明、讲解视频和技能压缩包，方便向客户直观演示。',
+      skills:[
+        {id:'mfg-sched', title:'工艺排产 Skill', desc:'覆盖工艺路线梳理、产能测算、排产优化到异常调度。包含视频讲解与可下载的排产模板压缩包。', meta:'更新于 2026-05-28 · v2.0 · 视频 05:10', text:'工艺排产 Skill 面向生产计划与工艺工程师，覆盖从工艺路线梳理、产能测算、排产优化到异常调度处置的完整链路。帮助车间在订单波动时快速重排，保障交付达成。\n\n本 Skill 已沉淀 6 类排产策略、22 组异常处理预案，并配套真实产线排产案例，帮助计划员把换线等待时间降低 25%。', zipFileName:'mfg-process-scheduling-skill-v2.0.zip', zipSizeText:'21.7 MB · 含排产模板 + 案例数据', hasVideo:false, hasZip:false},
+        {id:'mfg-qc', title:'质量巡检 Skill', desc:'覆盖巡检路线、抽检标准、缺陷判定到异常反馈。包含视频讲解与巡检记录模板压缩包。', meta:'更新于 2026-06-02 · v1.3 · 视频 02:58', text:'质量巡检 Skill 面向质检员与班组长，覆盖从巡检路线、抽检标准、缺陷判定到异常反馈的标准作业流程。帮助产线把质量风险拦截在萌芽阶段。\n\n本 Skill 已沉淀 5 类缺陷图谱、16 组判定标准，并配套巡检记录模板与真实异常案例，帮助新员工 1 周内独立上岗。', zipFileName:'mfg-quality-check-skill-v1.3.zip', zipSizeText:'13.5 MB · 含巡检模板 + 缺陷图谱', hasVideo:false, hasZip:false}
+      ]
+    },
+    wh:{
+      name:'仓库岗', short:'入库验收、拣货分拣、库存盘点等仓储 Skill。',
+      intro:'覆盖到货核对、质检抽样、上架策略、拣货分拣到库存盘点等仓储全流程。每个 Skill 都支持上传文字说明、讲解视频和技能压缩包，方便向客户直观演示。',
+      skills:[
+        {id:'wh-inbound', title:'入库验收 Skill', desc:'覆盖到货核对、质检抽样、上架策略到异常登记。包含视频讲解与可下载的验收模板压缩包。', meta:'更新于 2026-06-05 · v1.3 · 视频 02:48', text:'入库验收 Skill 面向上架员与仓管，覆盖从到货核对、质检抽样、上架策略到异常登记的标准作业流程。确保每一批入库物料可追溯、可质检、可定位。\n\n本 Skill 已沉淀 4 类抽样标准、16 组异常登记模板，并配套真实入库录像，帮助仓管把验收差错率降低 30%。', zipFileName:'wh-inbound-check-skill-v1.3.zip', zipSizeText:'8.6 MB · 含验收模板 + 抽样标准', hasVideo:false, hasZip:false},
+        {id:'wh-stock', title:'库存盘点 Skill', desc:'覆盖盘点计划、差异分析、复盘流程到库存调整。包含视频讲解与盘点模板压缩包。', meta:'更新于 2026-06-08 · v1.1 · 视频 03:22', text:'库存盘点 Skill 面向仓管与财务，覆盖从盘点计划、差异分析、复盘流程到库存调整的标准作业流程。帮助仓库保持账实一致。\n\n本 Skill 已沉淀 3 类盘点策略、12 组差异处理模板，并配套盘点表与差异分析示例，帮助盘点周期缩短 35%。', zipFileName:'wh-stock-count-skill-v1.1.zip', zipSizeText:'9.1 MB · 含盘点模板 + 分析示例', hasVideo:false, hasZip:false}
+      ]
+    }
+  };
+}
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem('skillapp_positions');
+    if(raw) return JSON.parse(raw);
+  }catch(e){ console.error(e); }
+  return seedDefaults();
+}
+function saveData(){
+  localStorage.setItem('skillapp_positions', JSON.stringify(positions));
+}
+
+/* ---------- IndexedDB 文件存储 ---------- */
+const DB_NAME='SkillAppDB', DB_VERSION=1;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('videos')) db.createObjectStore('videos');
+      if(!db.objectStoreNames.contains('zips')) db.createObjectStore('zips');
+    };
+    req.onsuccess = (e)=>resolve(e.target.result);
+    req.onerror = (e)=>reject(e);
+  });
+}
+function readFile(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = (e)=>resolve(e.target.result);
+    r.onerror = (e)=>reject(e);
+    r.readAsArrayBuffer(file);
+  });
+}
+async function putFile(storeName, key, file){
+  const buf = await readFile(file);
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction([storeName],'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.put({buffer:buf, type:file.type, name:file.name}, key);
+    req.onsuccess = ()=>resolve();
+    req.onerror = (e)=>reject(e);
+  });
+}
+async function getFile(storeName, key){
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction([storeName],'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.get(key);
+    req.onsuccess = (e)=>{
+      const data = e.target.result;
+      resolve(data ? new Blob([data.buffer], {type:data.type}) : null);
+    };
+    req.onerror = (e)=>reject(e);
+  });
+}
+async function delFile(storeName, key){
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction([storeName],'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.delete(key);
+    req.onsuccess = ()=>resolve();
+    req.onerror = (e)=>reject(e);
+  });
+}
+async function clearFiles(){
+  const db = await openDB();
+  await new Promise((res,rej)=>{ const tx=db.transaction(['videos'],'readwrite'); const s=tx.objectStore('videos'); const r=s.clear(); r.onsuccess=res; r.onerror=rej; });
+  await new Promise((res,rej)=>{ const tx=db.transaction(['zips'],'readwrite'); const s=tx.objectStore('zips'); const r=s.clear(); r.onsuccess=res; r.onerror=rej; });
+}
+
+/* ---------- 路由 ---------- */
+function navigate(path){
+  if(!path.startsWith('/')) path = '/'+path;
+  location.hash = '#' + path;
+}
+function parseHash(){
+  const hash = location.hash.replace('#','') || '/';
+  const parts = hash.split('/').filter(Boolean);
+  if(parts[0]==='positions') return {view:'positions'};
+  if(parts[0]==='position' && parts[1]) return {view:'position', pos:parts[1]};
+  if(parts[0]==='skill' && parts[1] && parts[2]) return {view:'skill', pos:parts[1], skill:parts[2]};
+  if(parts[0]==='admin') return {view:'admin'};
+  return {view:'home'};
+}
+function route(){
+  const r = parseHash();
+  if(r.view==='home') renderHomeView();
+  else if(r.view==='positions') renderPositionsView();
+  else if(r.view==='position') renderPositionView(r.pos);
+  else if(r.view==='skill') renderSkillView(r.pos, r.skill);
+  else if(r.view==='admin') renderAdminView();
+}
+
+function setNav(view){
+  document.querySelectorAll('nav.links a').forEach(a=>{
+    const n = a.dataset.nav;
+    a.classList.toggle('active', (view==='home'&&n==='home') || (view!=='home'&&view!=='about'&&n==='positions'));
+  });
+}
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ---------- 首页 ---------- */
+function renderHomeView(){
+  showView('home');
+  setNav('home');
+  renderHeroTabs('sales');
+  renderHomeCards();
+}
+function renderHeroTabs(selected){
+  const tabs = document.getElementById('hero-tabs');
+  tabs.innerHTML = POS_KEYS.map(k=>`
+    <div class="mini-tab ${k===selected?'active':''}" onclick="setHeroTab('${k}')">
+      ${MINI_ICONS[k]}
+      <span>${positions[k].name.replace('岗','')}</span>
+    </div>
+  `).join('');
+  const p = positions[selected];
+  document.getElementById('hero-showcase').innerHTML = `
+    <h4>${p.name} know-how 一站式沉淀</h4>
+    <span>${p.skills.length} 个 Skill · 支持文字 / 视频 / 压缩包</span>
+    <button class="btn-primary sm" style="margin-top:10px;" onclick="openPosition('${selected}')">查看 ${p.name} Skill →</button>
+  `;
+}
+function setHeroTab(k){ renderHeroTabs(k); }
+function renderHomeCards(){
+  const grid = document.getElementById('home-pos-grid');
+  grid.innerHTML = POS_KEYS.map(k=>posCardHTML(k)).join('');
+}
+function posCardHTML(k){
+  const p = positions[k];
+  return `<div class="pos-card" onclick="openPosition('${k}')">
+    <div class="icon-box">${ICONS[k]}</div>
+    <h3>${p.name}</h3>
+    <span class="count-badge">${p.skills.length} 个 Skill</span>
+    <p>${p.short}</p>
+    <span class="arrow">查看 Skill →</span>
+  </div>`;
+}
+function showPositions(){ navigate('/positions'); }
+
+/* ---------- 岗位目录页 ---------- */
+function renderPositionsView(){
+  showView('positions');
+  setNav('positions');
+  const grid = document.getElementById('positions-grid');
+  grid.innerHTML = POS_KEYS.map(k=>posCardHTML(k)).join('');
+}
+
+/* ---------- 岗位详情页 ---------- */
+function openPosition(key){ navigate('/position/'+key); }
+function renderPositionView(key){
+  if(!positions[key]){ navigate('/'); return; }
+  const p = positions[key];
+  showView('position');
+  setNav('positions');
+  document.getElementById('pos-badge').textContent = p.name;
+  document.getElementById('pos-title').textContent = p.name.replace('岗','岗位') + ' Skill 库';
+  document.getElementById('pos-desc').textContent = p.intro;
+  document.getElementById('pos-crumb').innerHTML =
+    `<a onclick="navigate('/')">首页</a><span class="sep">/</span><a onclick="showPositions()">岗位技能</a><span class="sep">/</span><span class="current">${p.name}</span>`;
+  document.getElementById('pos-skills-sub').textContent = `共 ${p.skills.length} 个 Skill · 点击卡片查看详情`;
+  const list = document.getElementById('pos-skills');
+  if(p.skills.length===0){
+    list.innerHTML = `<div class="empty-state">该岗位暂无 Skill，去 <a onclick="goAdmin()">管理后台</a> 添加。</div>`;
+  }else{
+    list.innerHTML = p.skills.map(s=>skillCardHTML(key,s)).join('');
+  }
+}
+function skillCardHTML(posKey, s){
+  return `<div class="skill-card" onclick="openSkill('${posKey}','${s.id}')">
+    <div class="skill-thumb"><div class="play"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#0E4DA4"/></svg></div></div>
+    <div class="skill-body">
+      <h3>${s.title}</h3>
+      <p>${s.desc}</p>
+      <span class="meta">${s.meta}</span>
+      <span class="arrow">查看详情 →</span>
+    </div>
+  </div>`;
+}
+
+/* ---------- Skill 详情页 ---------- */
+function openSkill(posKey, skillId){ navigate('/skill/'+posKey+'/'+skillId); }
+async function renderSkillView(posKey, skillId){
+  if(!positions[posKey]){ navigate('/'); return; }
+  const p = positions[posKey];
+  const s = p.skills.find(x=>x.id===skillId);
+  if(!s){ navigate('/position/'+posKey); return; }
+  showView('skill');
+  setNav('positions');
+  document.getElementById('skill-title').textContent = s.title;
+  document.getElementById('skill-pos-tag').textContent = p.name;
+  document.getElementById('skill-meta-text').textContent = s.meta;
+  document.getElementById('skill-text').textContent = s.text;
+  document.getElementById('file-name').textContent = s.zipFileName || 'skill-package.zip';
+  document.getElementById('file-size').textContent = s.zipSizeText || '压缩包';
+  document.getElementById('skill-crumb').innerHTML =
+    `<a onclick="navigate('/')">首页</a><span class="sep">/</span>`+
+    `<a onclick="showPositions()">岗位技能</a><span class="sep">/</span>`+
+    `<a onclick="openPosition('${posKey}')">${p.name}</a><span class="sep">/</span>`+
+    `<span class="current">${s.title}</span>`;
+  // 视频
+  const vbody = document.getElementById('video-body');
+  const cap = document.getElementById('video-caption');
+  if(currentVideoUrl){ URL.revokeObjectURL(currentVideoUrl); currentVideoUrl=null; }
+  if(s.hasVideo){
+    vbody.innerHTML = '<div style="color:#fff;">加载视频中...</div>';
+    try{
+      const blob = await getFile('videos', s.id);
+      if(blob){
+        currentVideoUrl = URL.createObjectURL(blob);
+        vbody.innerHTML = `<video src="${currentVideoUrl}" controls></video>`;
+      }else{
+        vbody.innerHTML = placeholderPlay();
+      }
+    }catch(e){ vbody.innerHTML = placeholderPlay(); }
+  }else{
+    vbody.innerHTML = placeholderPlay();
+  }
+  cap.textContent = s.hasVideo ? '讲解视频（已上传）' : '讲解视频（暂未上传，可在管理后台添加）';
+}
+function placeholderPlay(){
+  return '<div class="play"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#0E4DA4"/></svg></div>';
+}
+async function downloadSkill(){
+  const r = parseHash();
+  if(r.view!=='skill' || !positions[r.pos]) return;
+  const s = positions[r.pos].skills.find(x=>x.id===r.skill);
+  if(!s) return;
+  if(s.hasZip){
+    try{
+      const blob = await getFile('zips', s.id);
+      if(blob){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=s.zipFileName||'skill.zip'; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 5000);
+        return;
+      }
+    }catch(e){ console.error(e); }
+  }
+  // 演示占位文件
+  const content = `智造 Skill · 演示压缩包（示例）\n\nSkill：${s.title}\n岗位：${positions[r.pos].name}\n说明：${s.desc}\n\n（正式环境此处为真实 Skill 压缩包下载）\n`;
+  const blob = new Blob([content], {type:'application/zip'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=s.zipFileName||'skill.zip'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+/* ---------- 管理后台 ---------- */
+function goAdmin(){ navigate('/admin'); }
+function renderAdminView(){
+  showView('admin');
+  setNav('admin');
+  renderAdminPosList();
+  if(adminSelectedPos && positions[adminSelectedPos]){
+    renderAdminSkillPanel(adminSelectedPos);
+  }else{
+    document.getElementById('admin-welcome').style.display='block';
+    document.getElementById('admin-skill-panel').style.display='none';
+  }
+}
+function renderAdminPosList(){
+  const el = document.getElementById('admin-pos-list');
+  el.innerHTML = POS_KEYS.map(k=>{
+    const p = positions[k];
+    return `<div class="admin-pos-item ${k===adminSelectedPos?'active':''}" onclick="selectAdminPos('${k}')">
+      <span>${p.name}</span>
+      <span class="count">${p.skills.length}</span>
+    </div>`;
+  }).join('');
+}
+function selectAdminPos(k){
+  adminSelectedPos = k;
+  renderAdminPosList();
+  renderAdminSkillPanel(k);
+}
+function renderAdminSkillPanel(k){
+  document.getElementById('admin-welcome').style.display='none';
+  document.getElementById('admin-skill-panel').style.display='block';
+  document.getElementById('admin-pos-title').textContent = positions[k].name + ' · Skill 管理';
+  hidePositionForm(); hideSkillForm();
+  const list = document.getElementById('admin-skill-list');
+  if(positions[k].skills.length===0){
+    list.innerHTML = '<div class="admin-empty">暂无 Skill，点击右上角「+ 添加 Skill」开始。</div>';
+  }else{
+    list.innerHTML = positions[k].skills.map(s=>`
+      <div class="admin-skill-item">
+        <div class="admin-skill-info">
+          <h4>${s.title}</h4>
+          <span>${s.meta}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="admin-skill-badges">
+            ${s.hasVideo?'<span class="admin-badge">视频</span>':''}
+            ${s.hasZip?'<span class="admin-badge">压缩包</span>':''}
+          </div>
+          <div class="admin-actions">
+            <button class="btn-secondary sm" onclick="editSkill('${s.id}')">编辑</button>
+            <button class="btn-danger" onclick="deleteSkill('${s.id}')">删除</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+/* 岗位表单 */
+function showPositionForm(){
+  document.getElementById('admin-pos-form').style.display='block';
+  document.getElementById('pos-form-title').textContent='添加岗位';
+  document.getElementById('adm-pos-id').value='';
+  document.getElementById('adm-pos-name').value='';
+  document.getElementById('adm-pos-short').value='';
+  document.getElementById('adm-pos-intro').value='';
+}
+function hidePositionForm(){ document.getElementById('admin-pos-form').style.display='none'; }
+function savePositionForm(){
+  const id = document.getElementById('adm-pos-id').value.trim();
+  const name = document.getElementById('adm-pos-name').value.trim();
+  const short = document.getElementById('adm-pos-short').value.trim();
+  const intro = document.getElementById('adm-pos-intro').value.trim();
+  if(!name){ alert('请输入岗位名称'); return; }
+  if(id && positions[id]){
+    positions[id] = {...positions[id], name, short, intro};
+  }else{
+    const key = 'pos_'+Date.now();
+    positions[key] = {name, short, intro, skills:[]};
+    POS_KEYS.push(key);
+    adminSelectedPos = key;
+  }
+  saveData();
+  renderAdminPosList();
+  renderAdminSkillPanel(adminSelectedPos);
+  hidePositionForm();
+}
+
+/* Skill 表单 */
+let editingSkillId = null;
+function showSkillForm(){
+  editingSkillId = null;
+  document.getElementById('admin-skill-form').style.display='block';
+  document.getElementById('skill-form-title').textContent='添加 Skill';
+  document.getElementById('adm-skill-id').value='';
+  document.getElementById('adm-skill-title').value='';
+  document.getElementById('adm-skill-desc').value='';
+  document.getElementById('adm-skill-meta').value='';
+  document.getElementById('adm-skill-text').value='';
+  document.getElementById('adm-skill-zipname').value='';
+  document.getElementById('adm-skill-zipsize').value='';
+  document.getElementById('adm-skill-video').value='';
+  document.getElementById('adm-skill-zip').value='';
+}
+function editSkill(skillId){
+  const s = positions[adminSelectedPos].skills.find(x=>x.id===skillId);
+  if(!s) return;
+  editingSkillId = skillId;
+  document.getElementById('admin-skill-form').style.display='block';
+  document.getElementById('skill-form-title').textContent='编辑 Skill';
+  document.getElementById('adm-skill-id').value=s.id;
+  document.getElementById('adm-skill-title').value=s.title;
+  document.getElementById('adm-skill-desc').value=s.desc;
+  document.getElementById('adm-skill-meta').value=s.meta;
+  document.getElementById('adm-skill-text').value=s.text;
+  document.getElementById('adm-skill-zipname').value=s.zipFileName||'';
+  document.getElementById('adm-skill-zipsize').value=s.zipSizeText||'';
+  document.getElementById('adm-skill-video').value='';
+  document.getElementById('adm-skill-zip').value='';
+}
+function hideSkillForm(){ document.getElementById('admin-skill-form').style.display='none'; editingSkillId=null; }
+async function saveSkillForm(){
+  if(!adminSelectedPos){ alert('请先选择岗位'); return; }
+  const title = document.getElementById('adm-skill-title').value.trim();
+  const desc = document.getElementById('adm-skill-desc').value.trim();
+  const meta = document.getElementById('adm-skill-meta').value.trim();
+  const text = document.getElementById('adm-skill-text').value.trim();
+  const zipFileName = document.getElementById('adm-skill-zipname').value.trim();
+  const zipSizeText = document.getElementById('adm-skill-zipsize').value.trim();
+  const videoFile = document.getElementById('adm-skill-video').files[0];
+  const zipFile = document.getElementById('adm-skill-zip').files[0];
+  if(!title){ alert('请输入 Skill 名称'); return; }
+
+  let skillId;
+  let existing;
+  if(editingSkillId){
+    skillId = editingSkillId;
+    existing = positions[adminSelectedPos].skills.find(x=>x.id===skillId);
+  }else{
+    skillId = 'skill_'+Date.now();
+    existing = {id:skillId, posId:adminSelectedPos, hasVideo:false, hasZip:false};
+    positions[adminSelectedPos].skills.push(existing);
+  }
+
+  existing.title = title;
+  existing.desc = desc;
+  existing.meta = meta;
+  existing.text = text;
+  existing.zipFileName = zipFileName || (title.replace(/\s+/g,'-').toLowerCase()+'.zip');
+  existing.zipSizeText = zipSizeText || '压缩包';
+
+  if(videoFile){
+    try{
+      await putFile('videos', skillId, videoFile);
+      existing.hasVideo = true;
+    }catch(e){ alert('视频保存失败：'+e.message); }
+  }
+  if(zipFile){
+    try{
+      await putFile('zips', skillId, zipFile);
+      existing.hasZip = true;
+      if(!zipSizeText.includes('MB')) existing.zipSizeText = formatSize(zipFile.size) + ' · ' + (zipSizeText||'压缩包');
+    }catch(e){ alert('压缩包保存失败：'+e.message); }
+  }
+
+  saveData();
+  hideSkillForm();
+  renderAdminSkillPanel(adminSelectedPos);
+  renderAdminPosList();
+}
+function formatSize(b){
+  if(b<1024) return b+' B';
+  if(b<1024*1024) return (b/1024).toFixed(1)+' KB';
+  return (b/(1024*1024)).toFixed(1)+' MB';
+}
+async function deleteSkill(skillId){
+  if(!confirm('确定删除该 Skill 吗？相关视频和压缩包也会一并删除。')) return;
+  const pos = positions[adminSelectedPos];
+  pos.skills = pos.skills.filter(s=>s.id!==skillId);
+  try{
+    await delFile('videos', skillId);
+    await delFile('zips', skillId);
+  }catch(e){ console.error(e); }
+  saveData();
+  renderAdminSkillPanel(adminSelectedPos);
+  renderAdminPosList();
+}
+
+/* 导入/导出/重置 */
+function exportData(){
+  const data = JSON.stringify(positions, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='skillapp-positions.json'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+function importData(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || typeof data!=='object') throw new Error('格式错误');
+      positions = data;
+      POS_KEYS.length = 0;
+      Object.keys(positions).forEach(k=>POS_KEYS.push(k));
+      saveData();
+      // 文件不会随 JSON 导入，提醒
+      alert('配置导入成功。注意：视频/压缩包文件未包含在 JSON 中，需重新上传。');
+      adminSelectedPos = POS_KEYS[0] || null;
+      renderAdminView();
+    }catch(err){ alert('导入失败：'+err.message); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+async function resetDefaults(){
+  if(!confirm('确定重置为示例数据吗？当前所有自定义岗位、Skill、上传文件都会被清空。')) return;
+  positions = seedDefaults();
+  POS_KEYS.length = 0;
+  Object.keys(positions).forEach(k=>POS_KEYS.push(k));
+  saveData();
+  try{ await clearFiles(); }catch(e){ console.error(e); }
+  adminSelectedPos = POS_KEYS[0];
+  renderAdminView();
+  alert('已重置为示例数据');
+}
+
+/* ---------- 导航点击 ---------- */
+document.querySelectorAll('nav.links a').forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const n = a.dataset.nav;
+    if(n==='home') navigate('/');
+    else if(n==='positions') showPositions();
+    else alert('演示占位：关于我们');
+  });
+});
+
+/* ---------- 初始化 ---------- */
+positions = loadData();
+// 确保 POS_KEYS 与本地数据同步
+POS_KEYS.length = 0;
+Object.keys(positions).forEach(k=>POS_KEYS.push(k));
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>

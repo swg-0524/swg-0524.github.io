@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>智造 Skill · 制造业 AI Skill 演示平台</title>
+<title>启云科技 · 制造业 AI Skill 演示平台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -318,9 +318,9 @@
 
   <footer>
     <div class="foot-left">
-      <span class="b">智造 Skill</span>
+      <span class="b">启云科技</span>
       <span class="t">把岗位经验，做成可演示的 Skill。</span>
-      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+      <span class="c">版权所有 2026 · 启云科技 · 演示用途</span>
     </div>
     <div class="foot-cols">
       <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
@@ -343,9 +343,9 @@
   </div>
   <footer>
     <div class="foot-left">
-      <span class="b">智造 Skill</span>
+      <span class="b">启云科技</span>
       <span class="t">把岗位经验，做成可演示的 Skill。</span>
-      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+      <span class="c">版权所有 2026 · 启云科技 · 演示用途</span>
     </div>
     <div class="foot-cols">
       <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
@@ -370,9 +370,9 @@
   <div class="skills-list" id="pos-skills"></div>
   <footer>
     <div class="foot-left">
-      <span class="b">智造 Skill</span>
+      <span class="b">启云科技</span>
       <span class="t">把岗位经验，做成可演示的 Skill。</span>
-      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+      <span class="c">版权所有 2026 · 启云科技 · 演示用途</span>
     </div>
     <div class="foot-cols">
       <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
@@ -420,9 +420,9 @@
   </div>
   <footer>
     <div class="foot-left">
-      <span class="b">智造 Skill</span>
+      <span class="b">启云科技</span>
       <span class="t">把岗位经验，做成可演示的 Skill。</span>
-      <span class="c">版权所有 2026 · 智造 Skill · 演示用途</span>
+      <span class="c">版权所有 2026 · 启云科技 · 演示用途</span>
     </div>
     <div class="foot-cols">
       <div class="foot-col"><h4>产品</h4><a onclick="showPositions()">岗位 Skill</a><a onclick="showPositions()">演示模式</a></div>
@@ -804,7 +804,7 @@ async function downloadSkill(){
     }catch(e){ console.error(e); }
   }
   // 演示占位文件
-  const content = `智造 Skill · 演示压缩包（示例）\n\nSkill：${s.title}\n岗位：${positions[r.pos].name}\n说明：${s.desc}\n\n（正式环境此处为真实 Skill 压缩包下载）\n`;
+  const content = `启云科技 · 演示压缩包（示例）\n\nSkill：${s.title}\n岗位：${positions[r.pos].name}\n说明：${s.desc}\n\n（正式环境此处为真实 Skill 压缩包下载）\n`;
   const blob = new Blob([content], {type:'application/zip'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=s.zipFileName||'skill.zip'; document.body.appendChild(a); a.click(); a.remove();

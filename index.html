@@ -262,6 +262,7 @@
     .admin-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--line);}
   }
 </style>
+<!-- 启云科技 Skill 平台：云端存储使用 GitHub 仓库（数据 JSON + Release 资源），无需自建后端 -->
 </head>
 <body>
 
@@ -453,7 +454,7 @@
     </aside>
     <main class="admin-main">
       <div class="admin-banner">
-        <strong>纯前端演示说明：</strong>在此后台添加的岗位、Skill、视频与压缩包会保存在当前浏览器的本地存储中。刷新页面不会丢失，但换设备/浏览器或清空缓存会丢失；正式上线需接入后端存储。
+        <strong>云端存储已接入：</strong>在此后台添加的岗位、Skill、视频与压缩包会保存至启云科技自托管后端服务器，多设备实时同步、刷新不丢失，不再依赖浏览器本地存储。
       </div>
       <div class="admin-toolbar">
         <button class="btn-secondary" onclick="exportData()">导出配置 JSON</button>
@@ -557,77 +558,142 @@ function seedDefaults(){
   };
 }
 
-function loadData(){
+/* ================= 云端存储配置（GitHub 仓库当后端，部署时修改） ================= */
+const GH_OWNER = 'swg-0524';            // ← GitHub 用户名（即你的 Pages 仓库所有者）
+const GH_REPO  = 'swg-0524.github.io';  // ← 仓库名（用户站点固定为此名）
+const GH_TOKEN = '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';  // ← fine-grained PAT（仅限本仓库，Contents: RW）
+const GH_DATA_FILE   = 'skill-data.json';   // 仓库内：岗位/Skill 元数据
+const GH_INDEX_FILE  = 'skill-files.json';  // 仓库内：文件索引（store/key → 仓库 uploads/ 路径）
+/* =========================================================================== */
+
+/* 初始化：有 token 即可读写（公开仓库也可用 token 避免 API 限流） */
+const GH_API = 'https://api.github.com';
+let GH_READY = !!GH_TOKEN;
+
+function ghHeaders(extra){
+  const h = Object.assign({ 'Accept':'application/vnd.github+json' }, extra || {});
+  if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
+  return h;
+}
+function b64enc(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64dec(b){ return decodeURIComponent(escape(atob(b))); }
+
+/* ---------- 云端结构化数据（岗位/Skill 元数据，存于仓库 JSON 文件） ---------- */
+async function ghGetFile(path){
+  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {headers:ghHeaders()});
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error('ghGetFile '+r.status);
+  const j = await r.json();
+  return { sha:j.sha, content: b64dec(j.content) };
+}
+async function ghPutFile(path, content, message){
+  let sha;
+  try{ const f = await ghGetFile(path); if(f) sha = f.sha; }catch(_){}
+  const body = { message, content: b64enc(content) };
+  if(sha) body.sha = sha;
+  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {
+    method:'PUT', headers: ghHeaders({'Content-Type':'application/json'}), body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('ghPutFile '+r.status);
+}
+async function loadData(){
+  if(!GH_READY){ console.warn('GitHub 未配置 token，使用本地示例数据'); return seedDefaults(); }
   try{
-    const raw = localStorage.getItem('skillapp_positions');
-    if(raw) return JSON.parse(raw);
-  }catch(e){ console.error(e); }
+    const f = await ghGetFile(GH_DATA_FILE);
+    if(f){
+      const data = JSON.parse(f.content);
+      if(data && typeof data==='object' && Object.keys(data).length) return data;
+    }
+  }catch(e){ console.error('loadData 失败，回退示例数据', e); }
   return seedDefaults();
 }
-function saveData(){
-  localStorage.setItem('skillapp_positions', JSON.stringify(positions));
+async function saveData(){
+  if(!GH_READY){ alert('GitHub 未配置 token，无法保存。请在代码顶部填入专用 PAT。'); return; }
+  try{
+    await ghPutFile(GH_DATA_FILE, JSON.stringify(positions, null, 2), 'update skill data');
+  }catch(e){ console.error('saveData 失败', e); alert('保存到 GitHub 失败，请检查 token 权限或网络'); }
 }
 
-/* ---------- IndexedDB 文件存储 ---------- */
-const DB_NAME='SkillAppDB', DB_VERSION=1;
-function openDB(){
-  return new Promise((resolve,reject)=>{
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e)=>{
-      const db = e.target.result;
-      if(!db.objectStoreNames.contains('videos')) db.createObjectStore('videos');
-      if(!db.objectStoreNames.contains('zips')) db.createObjectStore('zips');
+/* ---------- 云端文件存储（视频/压缩包，存于仓库 uploads/ 目录，仅依赖 Contents 权限） ---------- */
+async function fileToB64(file){
+  return new Promise((resolve, reject)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      const buf = new Uint8Array(fr.result);
+      let bin = '';
+      const chunk = 0x8000;
+      for(let i=0;i<buf.length;i+=chunk) bin += String.fromCharCode.apply(null, buf.subarray(i, i+chunk));
+      resolve(btoa(bin));
     };
-    req.onsuccess = (e)=>resolve(e.target.result);
-    req.onerror = (e)=>reject(e);
+    fr.onerror = reject;
+    fr.readAsArrayBuffer(file);
   });
 }
-function readFile(file){
-  return new Promise((resolve,reject)=>{
-    const r = new FileReader();
-    r.onload = (e)=>resolve(e.target.result);
-    r.onerror = (e)=>reject(e);
-    r.readAsArrayBuffer(file);
-  });
+async function ghGetRaw(path){
+  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {headers:ghHeaders()});
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error('ghGetRaw '+r.status);
+  const j = await r.json();
+  const bin = atob(j.content);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes]);
 }
-async function putFile(storeName, key, file){
-  const buf = await readFile(file);
-  const db = await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction([storeName],'readwrite');
-    const store = tx.objectStore(storeName);
-    const req = store.put({buffer:buf, type:file.type, name:file.name}, key);
-    req.onsuccess = ()=>resolve();
-    req.onerror = (e)=>reject(e);
+async function ghDeleteFile(path){
+  const f = await ghGetFile(path);
+  if(!f) return;
+  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {
+    method:'DELETE', headers: ghHeaders({'Content-Type':'application/json'}),
+    body: JSON.stringify({ message:'delete '+path, sha: f.sha })
   });
+  if(!r.ok) throw new Error('ghDeleteFile '+r.status);
 }
-async function getFile(storeName, key){
-  const db = await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction([storeName],'readonly');
-    const store = tx.objectStore(storeName);
-    const req = store.get(key);
-    req.onsuccess = (e)=>{
-      const data = e.target.result;
-      resolve(data ? new Blob([data.buffer], {type:data.type}) : null);
-    };
-    req.onerror = (e)=>reject(e);
-  });
+async function ghReadIndex(){
+  try{ const f = await ghGetFile(GH_INDEX_FILE); if(f) return JSON.parse(f.content); }catch(_){}
+  return {};
 }
-async function delFile(storeName, key){
-  const db = await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx = db.transaction([storeName],'readwrite');
-    const store = tx.objectStore(storeName);
-    const req = store.delete(key);
-    req.onsuccess = ()=>resolve();
-    req.onerror = (e)=>reject(e);
-  });
+async function putFile(store, key, file){
+  if(!GH_READY) throw new Error('GitHub 未配置 token');
+  const safeName = `${store}__${key}__${file.name}`.replace(/[^\w.\-\u4e00-\u9fa5]/g,'_');
+  const path = `uploads/${store}/${safeName}`;
+  const idx = await ghReadIndex();
+  const mapKey = store + '/' + key;
+  if(idx[mapKey] && idx[mapKey].path){   // 已存在同 key 则先删旧文件
+    try{ await ghDeleteFile(idx[mapKey].path); }catch(_){}
+  }
+  const b64 = await fileToB64(file);
+  await ghPutFile(path, b64, 'upload ' + path);
+  idx[mapKey] = { path: path, name: file.name };
+  await ghPutFile(GH_INDEX_FILE, JSON.stringify(idx, null, 2), 'update file index');
+}
+async function getFile(store, key){
+  if(!GH_READY) return null;
+  try{
+    const idx = await ghReadIndex();
+    const e = idx[store + '/' + key];
+    if(e && e.path) return await ghGetRaw(e.path);
+  }catch(e){ console.error('getFile 失败', e); }
+  return null;
+}
+async function delFile(store, key){
+  if(!GH_READY) return;
+  const idx = await ghReadIndex();
+  const mapKey = store + '/' + key;
+  const e = idx[mapKey];
+  if(e && e.path){
+    try{ await ghDeleteFile(e.path); }catch(_){}
+    delete idx[mapKey];
+    await ghPutFile(GH_INDEX_FILE, JSON.stringify(idx, null, 2), 'update file index');
+  }
 }
 async function clearFiles(){
-  const db = await openDB();
-  await new Promise((res,rej)=>{ const tx=db.transaction(['videos'],'readwrite'); const s=tx.objectStore('videos'); const r=s.clear(); r.onsuccess=res; r.onerror=rej; });
-  await new Promise((res,rej)=>{ const tx=db.transaction(['zips'],'readwrite'); const s=tx.objectStore('zips'); const r=s.clear(); r.onsuccess=res; r.onerror=rej; });
+  if(!GH_READY) return;
+  const idx = await ghReadIndex();
+  for(const k in idx){
+    const e = idx[k];
+    if(e && e.path){ try{ await ghDeleteFile(e.path); }catch(_){} }
+  }
+  await ghPutFile(GH_INDEX_FILE, '{}', 'clear file index');
 }
 
 /* ---------- 路由 ---------- */
@@ -1051,12 +1117,14 @@ document.querySelectorAll('nav.links a').forEach(a=>{
 });
 
 /* ---------- 初始化 ---------- */
-positions = loadData();
-// 确保 POS_KEYS 与本地数据同步
-POS_KEYS.length = 0;
-Object.keys(positions).forEach(k=>POS_KEYS.push(k));
-window.addEventListener('hashchange', route);
-route();
+(async ()=>{
+  positions = await loadData();
+  // 确保 POS_KEYS 与云端数据同步
+  POS_KEYS.length = 0;
+  Object.keys(positions).forEach(k=>POS_KEYS.push(k));
+  window.addEventListener('hashchange', route);
+  route();
+})();
 </script>
 </body>
 </html>

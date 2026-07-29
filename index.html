@@ -264,7 +264,7 @@
 </style>
 <!-- 启云科技 Skill 平台：云端存储使用 GitHub 仓库（数据 JSON + Release 资源），无需自建后端 -->
 <!-- 启云科技 Skill 平台：云端存储使用 Back4app / Parse BaaS（数据 + 文件均走云端，无需自建后端） -->
-<script src="https://cdn.jsdelivr.net/npm/parse@3.5.0/dist/parse.min.js"></script>
+<script src="./parse.min.js"></script>
 </head>
 <body>
 
@@ -588,7 +588,10 @@ async function loadData(){
   try{
     const q = new Parse.Query(B4A_DATA_CLASS);
     q.limit(1);
-    const obj = await q.first();
+    const obj = await Promise.race([
+      q.first(),
+      new Promise((_, rej)=> setTimeout(()=> rej(new Error('loadData timeout 6s')), 6000))
+    ]);
     if(obj){
       B4A_DATA_ID = obj.id;
       const raw = obj.get('payload');

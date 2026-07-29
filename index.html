@@ -263,6 +263,8 @@
   }
 </style>
 <!-- 启云科技 Skill 平台：云端存储使用 GitHub 仓库（数据 JSON + Release 资源），无需自建后端 -->
+<!-- 启云科技 Skill 平台：云端存储使用 Back4app / Parse BaaS（数据 + 文件均走云端，无需自建后端） -->
+<script src="https://cdn.jsdelivr.net/npm/parse@3.5.0/dist/parse.min.js"></script>
 </head>
 <body>
 
@@ -558,63 +560,57 @@ function seedDefaults(){
   };
 }
 
-/* ================= 云端存储配置（GitHub 仓库当后端，部署时修改） ================= */
-const GH_OWNER = 'swg-0524';            // ← GitHub 用户名（即你的 Pages 仓库所有者）
-const GH_REPO  = 'swg-0524.github.io';  // ← 仓库名（用户站点固定为此名）
-const GH_TOKEN = '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';  // ← fine-grained PAT（仅限本仓库，Contents: RW）
-const GH_DATA_FILE   = 'skill-data.json';   // 仓库内：岗位/Skill 元数据
-const GH_INDEX_FILE  = 'skill-files.json';  // 仓库内：文件索引（store/key → 仓库 uploads/ 路径）
+/* ================= 云端存储配置（Back4app / Parse BaaS，部署时修改） ================= */
+const B4A_APP_ID = 'pwg40JGzEI5pGcrnrESssRa7hfqjMiH88gsaPOiv';   // ← Back4app App ID
+const B4A_JS_KEY = 'LLj0Nhm1QpWwatdmIP6toPXomGIgmec72rnahvhf';   // ← Back4app JavaScript Key
+const B4A_DATA_CLASS = 'SkillData';   // 存放岗位/Skill 元数据（首次保存自动建类）
 /* =========================================================================== */
 
-/* 初始化：有 token 即可读写（公开仓库也可用 token 避免 API 限流） */
-const GH_API = 'https://api.github.com';
-let GH_READY = !!GH_TOKEN;
+/* 初始化 Parse（仅当已配置 App ID 时；未配置则前端回退到本地示例数据） */
+let B4A_READY = false;
+if (typeof Parse !== 'undefined' && B4A_APP_ID) {
+  Parse.initialize(B4A_APP_ID, B4A_JS_KEY);
+  Parse.serverURL = 'https://parseapi.back4app.com';
+  B4A_READY = true;
+}
+/* 演示用 ACL：公开可读可写。生产环境应收敛写权限（云函数 + Master Key 写、客户端只读） */
+function b4aPublicACL(){
+  const acl = new Parse.ACL();
+  acl.setPublicReadAccess(true);
+  acl.setPublicWriteAccess(true);
+  return acl;
+}
 
-function ghHeaders(extra){
-  const h = Object.assign({ 'Accept':'application/vnd.github+json' }, extra || {});
-  if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
-  return h;
-}
-function b64enc(s){ return btoa(unescape(encodeURIComponent(s))); }
-function b64dec(b){ return decodeURIComponent(escape(atob(b))); }
-
-/* ---------- 云端结构化数据（岗位/Skill 元数据，存于仓库 JSON 文件） ---------- */
-async function ghGetFile(path){
-  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {headers:ghHeaders()});
-  if(r.status===404) return null;
-  if(!r.ok) throw new Error('ghGetFile '+r.status);
-  const j = await r.json();
-  return { sha:j.sha, content: b64dec(j.content) };
-}
-async function ghPutFile(path, content, message){
-  let sha;
-  try{ const f = await ghGetFile(path); if(f) sha = f.sha; }catch(_){}
-  const body = { message, content: b64enc(content) };
-  if(sha) body.sha = sha;
-  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {
-    method:'PUT', headers: ghHeaders({'Content-Type':'application/json'}), body: JSON.stringify(body)
-  });
-  if(!r.ok) throw new Error('ghPutFile '+r.status);
-}
+/* ---------- 云端结构化数据（岗位/Skill 元数据，存于 SkillData 对象） ---------- */
+let B4A_DATA_ID = null;   // 缓存数据对象 objectId，跨设备共享同一份数据
 async function loadData(){
-  if(!GH_READY){ console.warn('GitHub 未配置 token，使用本地示例数据'); return seedDefaults(); }
+  if(!B4A_READY){ console.warn('Back4app 未配置，使用本地示例数据'); return seedDefaults(); }
   try{
-    const f = await ghGetFile(GH_DATA_FILE);
-    if(f){
-      const data = JSON.parse(f.content);
-      if(data && typeof data==='object' && Object.keys(data).length) return data;
+    const q = new Parse.Query(B4A_DATA_CLASS);
+    q.limit(1);
+    const obj = await q.first();
+    if(obj){
+      B4A_DATA_ID = obj.id;
+      const raw = obj.get('payload');
+      if(raw && typeof raw==='object' && Object.keys(raw).length) return raw;
     }
   }catch(e){ console.error('loadData 失败，回退示例数据', e); }
   return seedDefaults();
 }
 async function saveData(){
-  if(!GH_READY){ alert('GitHub 未配置 token，无法保存。请在代码顶部填入专用 PAT。'); return; }
+  if(!B4A_READY){ alert('Back4app 未配置，无法保存。请在代码顶部填入 App ID / JavaScript Key。'); return; }
   try{
-    await ghPutFile(GH_DATA_FILE, JSON.stringify(positions, null, 2), 'update skill data');
-  }catch(e){ console.error('saveData 失败', e); alert('保存到 GitHub 失败，请检查 token 权限或网络'); }
+    const obj = B4A_DATA_ID
+      ? Parse.Object.createWithoutData(B4A_DATA_CLASS, B4A_DATA_ID)
+      : new Parse.Object(B4A_DATA_CLASS);
+    obj.set('payload', positions);
+    obj.setACL(b4aPublicACL());
+    const saved = await obj.save();
+    B4A_DATA_ID = saved.id;
+  }catch(e){ console.error('saveData 失败', e); alert('保存到 Back4app 失败，请检查 App ID/Key 或网络'); }
 }
 
-/* ---------- 云端文件存储（视频/压缩包，存于仓库 uploads/ 目录，仅依赖 Contents 权限） ---------- */
+/* ---------- 云端文件存储（视频/压缩包，直传 Back4app 文件服务） ---------- */
 async function fileToB64(file){
   return new Promise((resolve, reject)=>{
     const fr = new FileReader();
@@ -629,71 +625,62 @@ async function fileToB64(file){
     fr.readAsArrayBuffer(file);
   });
 }
-async function ghGetRaw(path){
-  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {headers:ghHeaders()});
-  if(r.status===404) return null;
-  if(!r.ok) throw new Error('ghGetRaw '+r.status);
-  const j = await r.json();
-  const bin = atob(j.content);
-  const bytes = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
-  return new Blob([bytes]);
-}
-async function ghDeleteFile(path){
-  const f = await ghGetFile(path);
-  if(!f) return;
-  const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${encodeURIComponent(path)}`, {
-    method:'DELETE', headers: ghHeaders({'Content-Type':'application/json'}),
-    body: JSON.stringify({ message:'delete '+path, sha: f.sha })
-  });
-  if(!r.ok) throw new Error('ghDeleteFile '+r.status);
-}
-async function ghReadIndex(){
-  try{ const f = await ghGetFile(GH_INDEX_FILE); if(f) return JSON.parse(f.content); }catch(_){}
-  return {};
-}
 async function putFile(store, key, file){
-  if(!GH_READY) throw new Error('GitHub 未配置 token');
-  const safeName = `${store}__${key}__${file.name}`.replace(/[^\w.\-\u4e00-\u9fa5]/g,'_');
-  const path = `uploads/${store}/${safeName}`;
-  const idx = await ghReadIndex();
+  if(!B4A_READY) throw new Error('Back4app 未配置');
+  const meta = await loadMeta();
   const mapKey = store + '/' + key;
-  if(idx[mapKey] && idx[mapKey].path){   // 已存在同 key 则先删旧文件
-    try{ await ghDeleteFile(idx[mapKey].path); }catch(_){}
-  }
   const b64 = await fileToB64(file);
-  await ghPutFile(path, b64, 'upload ' + path);
-  idx[mapKey] = { path: path, name: file.name };
-  await ghPutFile(GH_INDEX_FILE, JSON.stringify(idx, null, 2), 'update file index');
+  const safeName = `${store}__${key}__${file.name}`;
+  const pf = new Parse.File(safeName, b64);
+  const saved = await pf.save();
+  meta[mapKey] = { url: saved.url(), name: file.name };
+  await saveMeta(meta);
 }
 async function getFile(store, key){
-  if(!GH_READY) return null;
+  if(!B4A_READY) return null;
   try{
-    const idx = await ghReadIndex();
-    const e = idx[store + '/' + key];
-    if(e && e.path) return await ghGetRaw(e.path);
+    const meta = await loadMeta();
+    const e = meta[store + '/' + key];
+    if(e && e.url){
+      const r = await fetch(e.url);
+      if(r.ok) return await r.blob();
+    }
   }catch(e){ console.error('getFile 失败', e); }
   return null;
 }
 async function delFile(store, key){
-  if(!GH_READY) return;
-  const idx = await ghReadIndex();
+  if(!B4A_READY) return;
+  const meta = await loadMeta();
   const mapKey = store + '/' + key;
-  const e = idx[mapKey];
-  if(e && e.path){
-    try{ await ghDeleteFile(e.path); }catch(_){}
-    delete idx[mapKey];
-    await ghPutFile(GH_INDEX_FILE, JSON.stringify(idx, null, 2), 'update file index');
-  }
+  if(meta[mapKey]){ delete meta[mapKey]; await saveMeta(meta); }
 }
 async function clearFiles(){
-  if(!GH_READY) return;
-  const idx = await ghReadIndex();
-  for(const k in idx){
-    const e = idx[k];
-    if(e && e.path){ try{ await ghDeleteFile(e.path); }catch(_){} }
-  }
-  await ghPutFile(GH_INDEX_FILE, '{}', 'clear file index');
+  if(!B4A_READY) return;
+  await saveMeta({});
+}
+
+/* ---------- 文件索引（存于 SkillData 对象的 files 字段，JSON） ---------- */
+async function loadMeta(){
+  try{
+    const q = new Parse.Query(B4A_DATA_CLASS);
+    q.limit(1);
+    const obj = await q.first();
+    if(obj){
+      B4A_DATA_ID = obj.id;
+      const m = obj.get('files');
+      if(m && typeof m==='object') return m;
+    }
+  }catch(_){}
+  return {};
+}
+async function saveMeta(meta){
+  const obj = B4A_DATA_ID
+    ? Parse.Object.createWithoutData(B4A_DATA_CLASS, B4A_DATA_ID)
+    : new Parse.Object(B4A_DATA_CLASS);
+  obj.set('files', meta);
+  obj.setACL(b4aPublicACL());
+  const saved = await obj.save();
+  B4A_DATA_ID = saved.id;
 }
 
 /* ---------- 路由 ---------- */
